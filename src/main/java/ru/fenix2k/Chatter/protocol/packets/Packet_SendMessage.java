@@ -5,7 +5,7 @@ import ru.fenix2k.Chatter.protocol.PacketType;
 
 import java.util.List;
 
-public class Packet_SendMessage implements Packet {
+public class Packet_SendMessage extends Packet {
 
     private final PacketType type = PacketType.SENDMSG;
     private List<String> recipients;
