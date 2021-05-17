@@ -17,4 +17,8 @@ public class Packet_SuccessResponse extends Packet {
     public PacketType getType() {
         return type;
     }
+
+    public String getMessage() {
+        return message;
+    }
 }

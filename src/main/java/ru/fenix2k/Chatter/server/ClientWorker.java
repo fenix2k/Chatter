@@ -5,7 +5,6 @@ import ru.fenix2k.Chatter.protocol.Packet;
 import ru.fenix2k.Chatter.protocol.PacketType;
 import ru.fenix2k.Chatter.protocol.packets.Packet_AuthenticatedResponse;
 import ru.fenix2k.Chatter.protocol.packets.Packet_Connect;
-import ru.fenix2k.Chatter.protocol.packets.Packet_Disconnect;
 import ru.fenix2k.Chatter.protocol.packets.Packet_ErrorResponse;
 
 import java.io.IOException;
@@ -106,8 +105,8 @@ public class ClientWorker implements Runnable {
     private void processingPacket(Packet packet) throws IOException {
         switch (packet.getType()) {
             case CONNECT -> authenticateUser(packet);
-            case DISCONNECT -> closeConnection();
-            case SENDMSG -> sendMessage(packet);
+            case QUIT -> closeConnection();
+            case SEND_MSG -> sendMessage(packet);
             default -> throw new IllegalStateException("Invalid packet type: " + packet.getType());
         }
     }
@@ -117,7 +116,7 @@ public class ClientWorker implements Runnable {
      * @throws IOException
      */
     private void closeConnection() {
-        log.debug("Receive packet: " + PacketType.DISCONNECT);
+        log.debug("Receive packet: " + PacketType.QUIT);
         this.stop();
     }
 
@@ -145,6 +144,6 @@ public class ClientWorker implements Runnable {
      * @param packet
      */
     private void sendMessage(Packet packet) {
-        log.debug("Receive packet: " + PacketType.SENDMSG);
+        log.debug("Receive packet: " + PacketType.SEND_MSG);
     }
 }

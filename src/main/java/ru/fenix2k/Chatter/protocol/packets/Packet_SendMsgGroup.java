@@ -5,14 +5,14 @@ import ru.fenix2k.Chatter.protocol.PacketType;
 
 import java.util.List;
 
-public class Packet_SendMessage extends Packet {
+public class Packet_SendMsgGroup extends Packet {
 
-    private final PacketType type = PacketType.SENDMSG;
-    private List<String> recipients;
+    private final PacketType type = PacketType.SEND_MSGGROUP;
+    private String group;
     private String message;
 
-    public Packet_SendMessage(List<String> recipients, String message) {
-        this.recipients = recipients;
+    public Packet_SendMsgGroup(String group, String message) {
+        this.group = group;
         this.message = message;
     }
 

@@ -7,6 +7,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.ObjectOutputStream;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -53,6 +54,14 @@ public class SocketWriter implements Runnable {
         return currentThread;
     }
 
+    /**
+     * Возвращает статус потока
+     * @return bool
+     */
+    public boolean isRunning() {
+        return running.get();
+    }
+
     @Override
     public void run() {
         log.debug("SocketWriter started");
@@ -61,34 +70,27 @@ public class SocketWriter implements Runnable {
 
         // Основной цикл отправки пакетов серверу
         while (running.get()) {
-            BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
             try {
-                // Чтение команы с консоли
-                System.out.println("Write a command:");
-                String command = reader.readLine();
-                // Если Quit, то останавливаем поток
-                if(command.equals("quit")) break;
-                // Парсим команду и создаём соответствующий пакет
-                packet = PacketBuilder.buildFromCommand(command);
-                // Устанавливает ИД пакета
-                packet.setId(this.getNextId());
-            } catch (IllegalStateException | IOException ex) {
-                log.info(ex.getMessage(), ex);
-                continue;
-            }
+                // вытаскиваем пакет из очереди (блокирующая операция)
+                packet = client.writingPacketQueue.poll(100, TimeUnit.MILLISECONDS);
+                if(packet == null) continue;
 
-            try {
+                packet.setId(getNextId());
                 // Запоминаем пакет в лист ожидания ответа от сервера
                 client.packetResponseWaitingList.put(packet.getId(), packet);
                 // Отправка пакета серверу
                 oos.writeObject(packet);
                 oos.flush();
                 log.debug("Send packet to server: " + packet);
+                packet = null;
+            } catch (InterruptedException ex) {
+                log.info(ex.getMessage(), ex);
             } catch (IOException ex) {
                 client.packetResponseWaitingList.remove(packet.getId());
                 log.info(ex.getMessage(), ex);
             }
         }
+        client.closeConnection();
         log.debug("SocketWriter stopped");
     }
 

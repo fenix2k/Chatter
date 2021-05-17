@@ -3,8 +3,8 @@ package ru.fenix2k.Chatter.client;
 import org.apache.log4j.Logger;
 import ru.fenix2k.Chatter.protocol.Packet;
 import ru.fenix2k.Chatter.protocol.packets.Packet_Connect;
-import ru.fenix2k.Chatter.protocol.packets.Packet_Disconnect;
-import ru.fenix2k.Chatter.protocol.packets.Packet_SendMessage;
+import ru.fenix2k.Chatter.protocol.packets.Packet_Quit;
+import ru.fenix2k.Chatter.protocol.packets.Packet_SendMsg;
 
 import java.util.List;
 
@@ -29,7 +29,7 @@ public class PacketBuilder {
             case "connect" -> connectPacketBuilder(cmd);
             case "quit" -> disconnectPacketBuilder();
             case "sendmsg" -> sendmsgPacketBuilder(cmd);
-            default -> throw new IllegalStateException("Unknown command: " + cmd[0]);
+            default -> throw new IllegalStateException(cmd[0]);
         };
     }
 
@@ -39,7 +39,7 @@ public class PacketBuilder {
      */
     private static Packet disconnectPacketBuilder() {
         log.debug("Build Packet_Disconnect");
-        return new Packet_Disconnect();
+        return new Packet_Quit();
     }
 
     /**
@@ -67,7 +67,7 @@ public class PacketBuilder {
         if(cmd.length == 3) {
             List<String> username = List.of(cmd[1].trim().split(","));
             String message = cmd[2].trim();
-            return new Packet_SendMessage(username, message);
+            return new Packet_SendMsg(username, message);
         }
         throw new IllegalStateException("Invalid command");
     }

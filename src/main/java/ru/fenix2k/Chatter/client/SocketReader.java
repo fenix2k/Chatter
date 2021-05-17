@@ -1,7 +1,10 @@
 package ru.fenix2k.Chatter.client;
 
 import org.apache.log4j.Logger;
+import org.hibernate.boot.model.naming.IllegalIdentifierException;
 import ru.fenix2k.Chatter.protocol.Packet;
+import ru.fenix2k.Chatter.protocol.PacketType;
+import ru.fenix2k.Chatter.protocol.packets.*;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -50,6 +53,14 @@ public class SocketReader implements Runnable {
         return currentThread;
     }
 
+    /**
+     * Возвращает статус потока
+     * @return bool
+     */
+    public boolean isRunning() {
+        return running.get();
+    }
+
     @Override
     public void run() {
         log.debug("SocketReader started");
@@ -60,12 +71,16 @@ public class SocketReader implements Runnable {
             try {
                 log.debug("Read packet from stream");
                 packet = (Packet) ois.readObject();
+                //client.processingPacketQueue.add(packet);
                 // Обработка полученного пакета
-                processingPacket(packet);
+                packetHandler(packet);
+            } catch (ClassCastException | IllegalIdentifierException e) {
+                log.debug("Packet type error: " + e.getMessage());
             } catch (ClassNotFoundException | IOException e) {
                 log.debug("Socket closed");
             }
         }
+        client.closeConnection();
         log.debug("SocketReader stopped");
     }
 
@@ -74,50 +89,227 @@ public class SocketReader implements Runnable {
      * @param packet пакет
      * @throws IOException
      */
-    private void processingPacket(Packet packet) throws IOException {
+    private void packetHandler(Packet packet) throws IllegalIdentifierException, IOException {
         log.debug("Processing packet");
-        // Удаляем пакет из списка ожидания ответа
-        if(client.packetResponseWaitingList.containsKey(packet.getId()))
-            client.packetResponseWaitingList.remove(packet.getId());
-
         if(packet.getId() == 0) {
             // получен новый пакет от сервера
             log.debug("Packet from server received");
+            switch(packet.getType()) {
+                case MESSAGE        -> handleMessagePacket(packet);
+                case STATUS         -> handleStatusPacket(null, packet);
+                case USERINFO       -> handleUserinfoPacket(null, packet);
+                case SQUIT          -> handleSquitPacket(packet);
+                case INVITED        -> handleInvitedPacket(packet);
+                case KICKED         -> handleKickedPacket(packet);
+                default -> throw new IllegalStateException("Unknown command: " + packet.getType());
+            };
         }
         else {
+            // Если пакета нет в списке ожидания, то прерываем оработку пакета
+            if(!client.packetResponseWaitingList.containsKey(packet.getId())) {
+                log.warn("Received packet was not expected: " + packet.getId() + "[" + packet.getType() + "]");
+                return;
+            }
+            Packet sentPacket = client.packetResponseWaitingList.get(packet.getId());
             // получен ответ на запрос от сервера
             log.debug("Response packet received");
-            switch (packet.getType()) {
-                case DISCONNECT -> stop();
-                case ERROR -> errorMessageHandler(packet);
-                case SUCCESS -> successMessageHandler(packet);
-                case AUTHENTICATED -> authenticatedMessageHandler(packet);
-                default -> throw new IllegalStateException("Invalid packet type: " + packet.getType());
-            }
+            switch(packet.getType()) {
+                case AUTHENTICATED  -> handleAuthenticatedPacket(sentPacket, packet);
+                case ERROR          -> handleErrorPacket(sentPacket, packet);
+                case SUCCESS        -> handleSuccessPacket(sentPacket, packet);
+                case STATUS         -> handleStatusPacket(sentPacket, packet);
+                case CONTACTS       -> handleContactsPacket(sentPacket, packet);
+                case CONTACTS_STATUS -> handleContactsStatusPacket(sentPacket, packet);
+                case USERINFO       -> handleUserinfoPacket(sentPacket, packet);
+                default -> throw new IllegalStateException("Unknown command: " + packet.getType());
+            };
+
+            // Удаляем пакет из списка ожидания ответа
+            client.packetResponseWaitingList.remove(packet.getId());
         }
+    }
+
+    /**
+     * Проверка типа пакета по значению поля type
+     * @param packet пакет
+     * @param type ожидаемый тип
+     * @throws IllegalIdentifierException
+     */
+    private void checkPacketType(Packet packet, PacketType type)
+            throws IllegalIdentifierException {
+        if(!packet.getType().equals(type))
+            throw new IllegalIdentifierException(
+                    "Packet does not match the expected type. Given: " + packet.getType()
+                            + ". Expected: " + type);
+    }
+
+    /**
+     * Обрабатывает пакет CONTACTS_STATUS
+     * @param rcvPacket
+     */
+    private void handleContactsStatusPacket(Packet sentPacket, Packet rcvPacket)
+            throws IllegalIdentifierException, ClassCastException {
+        log.debug("Handle CONTACTS_STATUS packet");
+        this.checkPacketType(sentPacket, PacketType.GET_CONTACTS_STATUS);
+        if(rcvPacket instanceof Packet_ContactsStatusResponse) {
+            var pkt = (Packet_ContactsStatusResponse) rcvPacket;
+            System.out.println("Your CONTACTS with statuses: " + pkt.getContacts());
+            // дописать обработку
+        } else
+            throw new ClassCastException("Packet type is wrong: " + rcvPacket.getType());
+    }
+
+    /**
+     * Обрабатывает пакет CONTACTS
+     * @param rcvPacket
+     */
+    private void handleContactsPacket(Packet sentPacket, Packet rcvPacket)
+            throws IllegalIdentifierException, ClassCastException {
+        log.debug("Handle CONTACTS packet");
+        this.checkPacketType(sentPacket, PacketType.GET_CONTACTS);
+        if(rcvPacket instanceof Packet_ContactsResponse) {
+            var pkt = (Packet_ContactsResponse) rcvPacket;
+            System.out.println("Your CONTACTS: " + pkt.getContacts());
+            // дописать обработку
+        } else
+            throw new ClassCastException("Packet type is wrong: " + rcvPacket.getType());
+    }
+
+    /**
+     * Обрабатывает пакет KICKED
+     * @param rcvPacket
+     */
+    private void handleKickedPacket(Packet rcvPacket) throws ClassCastException {
+        log.debug("Handle KICKED packet");
+        if(rcvPacket instanceof Packet_Kicked) {
+            var pkt = (Packet_Kicked) rcvPacket;
+            System.out.println("You was kicked from group: " + pkt.getGroup());
+            // дописать обработку
+        } else
+            throw new ClassCastException("Packet type is wrong: " + rcvPacket.getType());
+    }
+
+    /**
+     * Обрабатывает пакет INVITED
+     * @param rcvPacket
+     */
+    private void handleInvitedPacket(Packet rcvPacket) throws ClassCastException {
+        log.debug("Handle INVITE packet");
+        if(rcvPacket instanceof Packet_Invited) {
+            var pkt = (Packet_Invited) rcvPacket;
+            System.out.println("You was invited to group: " + pkt.getGroup());
+            // дописать обработку
+        } else
+            throw new ClassCastException("Packet type is wrong: " + rcvPacket.getType());
+    }
+
+    /**
+     * Обрабатывает пакет SQUIT
+     * @param rcvPacket
+     */
+    private void handleSquitPacket(Packet rcvPacket) throws ClassCastException {
+        log.debug("Handle SQUIT packet");
+        if(rcvPacket instanceof Packet_SQuit) {
+            var pkt = (Packet_SQuit) rcvPacket;
+            System.out.println("The server forcibly disconnected you from the server");
+            client.closeConnection();
+        } else
+            throw new ClassCastException("Packet type is wrong: " + rcvPacket.getType());
+    }
+
+    /**
+     * Обрабатывает пакет MESSAGE
+     * @param rcvPacket
+     */
+    private void handleMessagePacket(Packet rcvPacket) throws ClassCastException {
+        log.debug("Handle MESSAGE packet");
+        if(rcvPacket instanceof Packet_Message) {
+            var pkt = (Packet_Message) rcvPacket;
+            System.out.println(pkt.getSender() + " was wrote: " + pkt.getMessage());
+            // дописать обработку
+        } else
+            throw new ClassCastException("Packet type is wrong: " + rcvPacket.getType());
+    }
+
+    /**
+     * Обрабатывает пакет INFO
+     * @param sentPacket отправленный пакет
+     * @param rcvPacket полученный пакет
+     */
+    private void handleUserinfoPacket(Packet sentPacket, Packet rcvPacket)
+            throws IllegalIdentifierException, ClassCastException {
+        log.debug("Handle INFO packet");
+        if(rcvPacket instanceof Packet_UserinfoResponse) {
+            var pkt = (Packet_UserinfoResponse) rcvPacket;
+            System.out.println("USERINFO: " + pkt.getUserinfo());
+            // дописать обработку
+        } else
+            throw new ClassCastException("Packet type is wrong: " + rcvPacket.getType());
+    }
+
+    /**
+     * Обрабатывает пакет STATUS
+     * @param sentPacket отправленный пакет
+     * @param rcvPacket полученный пакет
+     */
+    private void handleStatusPacket(Packet sentPacket, Packet rcvPacket)
+            throws IllegalIdentifierException, ClassCastException {
+        log.debug("Handle STATUS packet");
+        this.checkPacketType(sentPacket, PacketType.GET_STATUS);
+        if(rcvPacket instanceof Packet_StatusResponse) {
+            var pkt = (Packet_StatusResponse) rcvPacket;
+            System.out.println("User " + pkt.getUser() + " has status " + pkt.getStatus());
+            // дописать обработку
+        } else
+            throw new ClassCastException("Packet type is wrong: " + rcvPacket.getType());
     }
 
     /**
      * Обрабатывает пакет ERROR
-     * @param packet пакет
+     * @param sentPacket отправленный пакет
+     * @param rcvPacket полученный пакет
      */
-    private void errorMessageHandler(Packet packet) {
-        log.debug("Error message packet received");
+    private void handleErrorPacket(Packet sentPacket, Packet rcvPacket)
+            throws IllegalIdentifierException, ClassCastException {
+        log.debug("Handle ERROR packet");
+        //this.checkPacketType(sentPacket, PacketType.GET_CONTACTS_STATUS);
+        if(rcvPacket instanceof Packet_ErrorResponse) {
+            var pkt = (Packet_ErrorResponse) rcvPacket;
+            System.out.println("The server responded with an error:" + pkt.getMessage() + ". Previous request: " + sentPacket.getType());
+            // дописать обработку
+        } else
+            throw new ClassCastException("Packet type is wrong: " + rcvPacket.getType());
     }
 
     /**
      * Обрабатывает пакет SUCCESS
-     * @param packet пакет
+     * @param sentPacket отправленный пакет
+     * @param rcvPacket полученный пакет
      */
-    private void successMessageHandler(Packet packet) {
-        log.debug("Success message packet received");
+    private void handleSuccessPacket(Packet sentPacket, Packet rcvPacket)
+            throws IllegalIdentifierException, ClassCastException {
+        log.debug("Handle SUCCESS packet");
+        //this.checkPacketType(sentPacket, PacketType.GET_CONTACTS_STATUS);
+        if(rcvPacket instanceof Packet_SuccessResponse) {
+            var pkt = (Packet_SuccessResponse) rcvPacket;
+            System.out.println("The server responded success:" + pkt.getMessage() + ". Previous request: " + sentPacket.getType());
+            // дописать обработку
+        } else
+            throw new ClassCastException("Packet type is wrong: " + rcvPacket.getType());
     }
 
     /**
      * Обрабатывает пакет AUTHENTICATED
-     * @param packet пакет
+     * @param sentPacket отправленный пакет
+     * @param rcvPacket полученный пакет
      */
-    private void authenticatedMessageHandler(Packet packet) {
-        log.debug("Authenticated message packet received");
+    private void handleAuthenticatedPacket(Packet sentPacket, Packet rcvPacket)
+            throws IllegalIdentifierException, ClassCastException {
+        log.debug("Handle AUTHENTICATED packet");
+        this.checkPacketType(sentPacket, PacketType.CONNECT);
+        if(rcvPacket instanceof Packet_SuccessResponse) {
+            client.writingPacketQueue.add(new Packet_GetContactsStatus());
+        } else
+            throw new ClassCastException("Packet type is wrong: " + rcvPacket.getType());
     }
 }

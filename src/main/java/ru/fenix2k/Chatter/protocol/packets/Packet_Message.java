@@ -3,18 +3,26 @@ package ru.fenix2k.Chatter.protocol.packets;
 import ru.fenix2k.Chatter.protocol.Packet;
 import ru.fenix2k.Chatter.protocol.PacketType;
 
-public class Packet_ErrorResponse extends Packet {
+import java.util.List;
 
-    private final PacketType type = PacketType.ERROR;
+public class Packet_Message extends Packet {
+
+    private final PacketType type = PacketType.MESSAGE;
+    private String sender;
     private String message;
 
-    public Packet_ErrorResponse(String message) {
+    public Packet_Message(String sender, String message) {
+        this.sender = sender;
         this.message = message;
     }
 
     @Override
     public PacketType getType() {
         return type;
+    }
+
+    public String getSender() {
+        return sender;
     }
 
     public String getMessage() {
