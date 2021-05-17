@@ -8,6 +8,9 @@ public class Packet_GetGroupMembers extends Packet {
     private final PacketType type = PacketType.GET_GROUPMEMBERS;
     private String group;
 
+    public Packet_GetGroupMembers() {
+    }
+
     public Packet_GetGroupMembers(String group) {
         this.group = group;
     }

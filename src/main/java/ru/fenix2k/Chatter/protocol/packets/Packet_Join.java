@@ -10,6 +10,9 @@ public class Packet_Join extends Packet {
     private final PacketType type = PacketType.JOIN;
     private String group;
 
+    public Packet_Join() {
+    }
+
     public Packet_Join(String group) {
         this.group = group;
     }

@@ -8,6 +8,9 @@ public class Packet_RemoveContact extends Packet {
     private final PacketType type = PacketType.REMOVE_CONTACT;
     private String user;
 
+    public Packet_RemoveContact() {
+    }
+
     public Packet_RemoveContact(String user) {
         this.user = user;
     }

@@ -8,6 +8,9 @@ public class Packet_GetUserinfo extends Packet {
     private final PacketType type = PacketType.GET_USERINFO;
     private String user;
 
+    public Packet_GetUserinfo() {
+    }
+
     public Packet_GetUserinfo(String user) {
         this.user = user;
     }

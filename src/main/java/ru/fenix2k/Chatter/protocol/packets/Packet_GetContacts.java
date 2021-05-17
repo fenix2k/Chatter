@@ -9,6 +9,9 @@ public class Packet_GetContacts extends Packet {
 
     private final PacketType type = PacketType.GET_CONTACTS;
 
+    public Packet_GetContacts() {
+    }
+
     @Override
     public PacketType getType() {
         return type;

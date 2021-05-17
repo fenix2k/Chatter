@@ -1,19 +1,20 @@
 package ru.fenix2k.Chatter.protocol;
 
 import org.apache.log4j.Logger;
-import ru.fenix2k.Chatter.client.PacketBuilder;
 import ru.fenix2k.Chatter.protocol.packets.*;
 
+import java.security.InvalidParameterException;
+import java.util.List;
 import java.util.Map;
 
 public class PacketFactory {
     private static final Logger log = Logger.getLogger(PacketFactory.class);
 
-    public static Packet build(PacketType type) {
+    public static Packet build(PacketType type) throws InvalidParameterException {
         return build(type, null);
     }
 
-    public static Packet build(PacketType type, Map<String, Object> params) {
+    public static Packet build(PacketType type, Map<String, Object> params) throws InvalidParameterException {
         return switch (type) {
             case QUIT           -> new Packet_Quit();
             case SQUIT          -> new Packet_SQuit();
@@ -51,96 +52,201 @@ public class PacketFactory {
         };
     }
 
-    private static Packet buildInvitedPacket(Map<String, Object> params) {
-        return new Packet_Invited();
+    private static void checkStringParametersByKey(Map<String, Object> params, List<String> keys) throws InvalidParameterException {
+        for (String key : keys) {
+            if(!params.containsKey(key) || params.get(key).toString().isEmpty())
+                throw new InvalidParameterException("Missing parameter or invalid: " + key);
+        }
+    }
+
+    private static void checkListParametersByKey(Map<String, Object> params, List<String> keys) throws InvalidParameterException {
+        for (String key : keys) {
+            if(!params.containsKey(key))
+                throw new InvalidParameterException("Missing parameter or invalid: " + key);
+            try {
+                List<String> list = (List<String>) params.get(key);
+                if(list.isEmpty())
+                    throw new InvalidParameterException("Missing parameter or invalid: " + key);
+            } catch (ClassCastException e) {
+                throw new InvalidParameterException("Missing parameter or invalid: " + key);
+            }
+        }
+    }
+
+    private static void checkMapParametersByKey(Map<String, Object> params, List<String> keys) throws InvalidParameterException {
+        for (String key : keys) {
+            if(!params.containsKey(key))
+                throw new InvalidParameterException("Missing parameter or invalid: " + key);
+            try {
+                Map<String, String> map = (Map<String, String>) params.get(key);
+                if(map.isEmpty())
+                    throw new InvalidParameterException("Missing parameter or invalid: " + key);
+            } catch (ClassCastException e) {
+                throw new InvalidParameterException("Missing parameter or invalid: " + key);
+            }
+        }
+    }
+
+    private static Packet buildInvitedPacket(Map<String, Object> params) throws InvalidParameterException {
+        if(params.isEmpty())
+            return new Packet_Invited();
+        checkStringParametersByKey(params, List.of("group"));
+        return new Packet_Invited(params.get("group").toString());
     }
 
     private static Packet buildInvitePacket(Map<String, Object> params) {
-        return new Packet_Invite();
+        if(params.isEmpty())
+            return new Packet_Invite();
+        checkStringParametersByKey(params, List.of("group", "user"));
+        return new Packet_Invite(params.get("group").toString(), params.get("user").toString());
     }
 
     private static Packet buildKickedPacket(Map<String, Object> params) {
-        return new Packet_Kicked();
+        if(params.isEmpty())
+            return new Packet_Kicked();
+        checkStringParametersByKey(params, List.of("group"));
+        return new Packet_Kicked(params.get("group").toString());
     }
 
     private static Packet buildKickPacket(Map<String, Object> params) {
-        return new Packet_Kick();
+        if(params.isEmpty())
+            return new Packet_Kick();
+        checkStringParametersByKey(params, List.of("group", "user"));
+        return new Packet_Kick(params.get("group").toString(), params.get("user").toString());
     }
 
     private static Packet buildGetGroupsMembersPacket(Map<String, Object> params) {
-        return new Packet_GetGroupMembers();
+        if(params.isEmpty())
+            return new Packet_GetGroupMembers();
+        checkStringParametersByKey(params, List.of("group"));
+        return new Packet_GetGroupMembers(params.get("group").toString());
     }
 
     private static Packet buildLeavePacket(Map<String, Object> params) {
-        return new Packet_Leave();
+        if(params.isEmpty())
+            return new Packet_Leave();
+        checkStringParametersByKey(params, List.of("group"));
+        return new Packet_Leave(params.get("group").toString());
     }
 
     private static Packet buildJoinPacket(Map<String, Object> params) {
-        return new Packet_Join();
+        if(params.isEmpty())
+            return new Packet_Join();
+        checkStringParametersByKey(params, List.of("group"));
+        return new Packet_Join(params.get("group").toString());
     }
 
     private static Packet buildRemoveContactPacket(Map<String, Object> params) {
-        return new Packet_RemoveContact();
+        if(params.isEmpty())
+            return new Packet_RemoveContact();
+        checkStringParametersByKey(params, List.of("user"));
+        return new Packet_RemoveContact(params.get("user").toString());
     }
 
     private static Packet buildAddContactPacket(Map<String, Object> params) {
-        return new Packet_AddContact();
+        if(params.isEmpty())
+            return new Packet_AddContact();
+        checkStringParametersByKey(params, List.of("user"));
+        return new Packet_AddContact(params.get("user").toString());
     }
 
     private static Packet buildContactsStatusPacket(Map<String, Object> params) {
-        return new Packet_ContactsStatusResponse();
+        if(params.isEmpty())
+            return new Packet_ContactsStatusResponse();
+        checkMapParametersByKey(params, List.of("contacts"));
+        return new Packet_ContactsStatusResponse((Map<String, String>) params.get("contacts"));
     }
 
     private static Packet buildContactsPacket(Map<String, Object> params) {
-        return new Packet_ContactsResponse();
+        if(params.isEmpty())
+            return new Packet_ContactsResponse();
+        checkListParametersByKey(params, List.of("contacts"));
+        return new Packet_ContactsResponse((List<String>) params.get("contacts"));
     }
 
     private static Packet buildGetUserinfoPacket(Map<String, Object> params) {
-        return new Packet_GetUserinfo();
+        if(params.isEmpty())
+            return new Packet_GetUserinfo();
+        checkStringParametersByKey(params, List.of("user"));
+        return new Packet_GetUserinfo(params.get("user").toString());
     }
 
     private static Packet buildUserinfoPacket(Map<String, Object> params) {
-        return new Packet_UserinfoResponse();
+        if(params.isEmpty())
+            return new Packet_UserinfoResponse();
+        checkStringParametersByKey(params, List.of("userinfo"));
+        return new Packet_UserinfoResponse(params.get("userinfo").toString());
     }
 
     private static Packet buildSendMsgGroupPacket(Map<String, Object> params) {
-        return new Packet_SendMsgGroup();
+        if(params.isEmpty())
+            return new Packet_SendMsgGroup();
+        checkStringParametersByKey(params, List.of("group", "message"));
+        return new Packet_SendMsgGroup(params.get("group").toString(), params.get("message").toString());
     }
 
     private static Packet buildSendMsgAllPacket(Map<String, Object> params) {
-        return new Packet_SendMsgAll();
+        if(params.isEmpty())
+            return new Packet_SendMsgAll();
+        checkStringParametersByKey(params, List.of("message"));
+        return new Packet_SendMsgAll(params.get("message").toString());
     }
 
     private static Packet buildSendMsgPacket(Map<String, Object> params) {
-        return new Packet_SendMsg();
+        if(params.isEmpty())
+            return new Packet_SendMsg();
+        checkStringParametersByKey(params, List.of("message"));
+        checkListParametersByKey(params, List.of("recipients"));
+        return new Packet_SendMsg((List<String>) params.get("recipients"), params.get("message").toString());
     }
 
     private static Packet buildMessagePacket(Map<String, Object> params) {
-        return new Packet_Message();
+        if(params.isEmpty())
+            return new Packet_Message();
+        checkStringParametersByKey(params, List.of("sender", "message"));
+        return new Packet_Message(params.get("sender").toString(), params.get("message").toString());
     }
 
     private static Packet buildSetStatusPacket(Map<String, Object> params) {
-        return new Packet_SetStatus();
+        if(params.isEmpty())
+            return new Packet_SetStatus();
+        checkStringParametersByKey(params, List.of("status"));
+        return new Packet_SetStatus(params.get("status").toString());
     }
 
     private static Packet buildGetStatusPacket(Map<String, Object> params) {
-        return new Packet_GetStatus();
+        if(params.isEmpty())
+            return new Packet_GetStatus();
+        checkStringParametersByKey(params, List.of("user"));
+        return new Packet_GetStatus(params.get("user").toString());
     }
 
     private static Packet buildStatusPacket(Map<String, Object> params) {
-        return new Packet_StatusResponse();
+        if(params.isEmpty())
+            return new Packet_Message();
+        checkStringParametersByKey(params, List.of("user", "status"));
+        return new Packet_Message(params.get("user").toString(), params.get("status").toString());
     }
 
     private static Packet buildSuccessPacket(Map<String, Object> params) {
-        return new Packet_SuccessResponse();
+        if(params.isEmpty())
+            return new Packet_SuccessResponse();
+        checkStringParametersByKey(params, List.of("message"));
+        return new Packet_SuccessResponse(params.get("message").toString());
     }
 
     private static Packet buildErrorPacket(Map<String, Object> params) {
-        return new Packet_ErrorResponse();
+        if(params.isEmpty())
+            return new Packet_ErrorResponse();
+        checkStringParametersByKey(params, List.of("message"));
+        return new Packet_ErrorResponse(params.get("message").toString());
     }
 
     private static Packet buildConnectPacket(Map<String, Object> params) {
-        return new Packet_Connect();
+        if(params.isEmpty())
+            return new Packet_Connect();
+        checkStringParametersByKey(params, List.of("username", "password"));
+        return new Packet_Connect(params.get("username").toString(), params.get("password").toString());
     }
 
 

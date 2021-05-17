@@ -10,6 +10,9 @@ public class Packet_SetStatus extends Packet {
     private final PacketType type = PacketType.SET_STATUS;
     private String status;
 
+    public Packet_SetStatus() {
+    }
+
     public Packet_SetStatus(String status) {
         this.status = status;
     }

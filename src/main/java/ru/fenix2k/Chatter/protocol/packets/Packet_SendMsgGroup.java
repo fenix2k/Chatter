@@ -11,6 +11,9 @@ public class Packet_SendMsgGroup extends Packet {
     private String group;
     private String message;
 
+    public Packet_SendMsgGroup() {
+    }
+
     public Packet_SendMsgGroup(String group, String message) {
         this.group = group;
         this.message = message;

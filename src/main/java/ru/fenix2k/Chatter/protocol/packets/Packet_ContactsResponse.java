@@ -11,6 +11,9 @@ public class Packet_ContactsResponse extends Packet {
     private final PacketType type = PacketType.CONTACTS;
     private List<String> contacts;
 
+    public Packet_ContactsResponse() {
+    }
+
     public Packet_ContactsResponse(List<String> contacts) {
         this.contacts = contacts;
     }

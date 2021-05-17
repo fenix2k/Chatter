@@ -9,6 +9,9 @@ public class Packet_Connect extends Packet {
     private String username;
     private String password;
 
+    public Packet_Connect() {
+    }
+
     public Packet_Connect(String username, String password) {
         this.username = username;
         this.password = password;

@@ -11,6 +11,9 @@ public abstract class Packet implements Serializable {
     /** Таймстамп создания пакета **/
     private long timestamp = System.currentTimeMillis();
 
+    public Packet() {
+    }
+
     /**
      * Возвращает тип пакета
      * @return тип пакета

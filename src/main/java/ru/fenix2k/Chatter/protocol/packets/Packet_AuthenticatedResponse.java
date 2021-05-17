@@ -8,6 +8,9 @@ public class Packet_AuthenticatedResponse extends Packet {
 
     private final PacketType type = PacketType.AUTHENTICATED;
 
+    public Packet_AuthenticatedResponse() {
+    }
+
     @Override
     public PacketType getType() {
         return type;

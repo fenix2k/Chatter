@@ -8,6 +8,9 @@ public class Packet_AddContact extends Packet {
     private final PacketType type = PacketType.ADD_CONTACT;
     private String user;
 
+    public Packet_AddContact() {
+    }
+
     public Packet_AddContact(String user) {
         this.user = user;
     }

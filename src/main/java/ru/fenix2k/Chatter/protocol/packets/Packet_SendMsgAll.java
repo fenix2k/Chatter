@@ -8,6 +8,9 @@ public class Packet_SendMsgAll extends Packet {
     private final PacketType type = PacketType.SEND_MSGALL;
     private String message;
 
+    public Packet_SendMsgAll() {
+    }
+
     public Packet_SendMsgAll(String message) {
         this.message = message;
     }

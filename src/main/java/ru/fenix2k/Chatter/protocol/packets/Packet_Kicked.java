@@ -8,6 +8,9 @@ public class Packet_Kicked extends Packet {
     private final PacketType type = PacketType.KICKED;
     private String group;
 
+    public Packet_Kicked() {
+    }
+
     public Packet_Kicked(String group) {
         this.group = group;
     }

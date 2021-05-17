@@ -11,6 +11,9 @@ public class Packet_SendMsg extends Packet {
     private List<String> recipients;
     private String message;
 
+    public Packet_SendMsg() {
+    }
+
     public Packet_SendMsg(List<String> recipients, String message) {
         this.recipients = recipients;
         this.message = message;

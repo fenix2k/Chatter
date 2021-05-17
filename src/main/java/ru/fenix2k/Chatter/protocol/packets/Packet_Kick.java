@@ -9,6 +9,9 @@ public class Packet_Kick extends Packet {
     private String group;
     private String user;
 
+    public Packet_Kick() {
+    }
+
     public Packet_Kick(String group, String user) {
         this.group = group;
         this.user = user;

@@ -8,6 +8,9 @@ public class Packet_ErrorResponse extends Packet {
     private final PacketType type = PacketType.ERROR;
     private String message;
 
+    public Packet_ErrorResponse() {
+    }
+
     public Packet_ErrorResponse(String message) {
         this.message = message;
     }

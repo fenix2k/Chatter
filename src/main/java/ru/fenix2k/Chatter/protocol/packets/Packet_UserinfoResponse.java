@@ -9,6 +9,9 @@ public class Packet_UserinfoResponse extends Packet {
     private final PacketType type = PacketType.USERINFO;
     private String userinfo;
 
+    public Packet_UserinfoResponse() {
+    }
+
     public Packet_UserinfoResponse(String userinfo) {
         this.userinfo = userinfo;
     }

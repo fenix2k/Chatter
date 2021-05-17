@@ -11,6 +11,9 @@ public class Packet_Message extends Packet {
     private String sender;
     private String message;
 
+    public Packet_Message() {
+    }
+
     public Packet_Message(String sender, String message) {
         this.sender = sender;
         this.message = message;

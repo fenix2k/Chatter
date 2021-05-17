@@ -12,6 +12,9 @@ public class Packet_ContactsStatusResponse extends Packet {
     private final PacketType type = PacketType.CONTACTS_STATUS;
     private Map<String, String> contacts;
 
+    public Packet_ContactsStatusResponse() {
+    }
+
     public Packet_ContactsStatusResponse(Map<String, String> contacts) {
         this.contacts = contacts;
     }

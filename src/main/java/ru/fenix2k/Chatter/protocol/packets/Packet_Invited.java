@@ -7,6 +7,9 @@ public class Packet_Invited extends Packet {
     private final PacketType type = PacketType.INVITED;
     private String group;
 
+    public Packet_Invited() {
+    }
+
     public Packet_Invited(String group) {
         this.group = group;
     }

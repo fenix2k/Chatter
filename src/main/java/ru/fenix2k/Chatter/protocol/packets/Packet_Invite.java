@@ -9,6 +9,9 @@ public class Packet_Invite extends Packet {
     private String group;
     private String user;
 
+    public Packet_Invite() {
+    }
+
     public Packet_Invite(String group, String user) {
         this.group = group;
         this.user = user;

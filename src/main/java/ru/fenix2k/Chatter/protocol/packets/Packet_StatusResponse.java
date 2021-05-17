@@ -9,6 +9,9 @@ public class Packet_StatusResponse extends Packet {
     private String user;
     private String status;
 
+    public Packet_StatusResponse() {
+    }
+
     public Packet_StatusResponse(String user, String status) {
         this.user = user;
         this.status = status;

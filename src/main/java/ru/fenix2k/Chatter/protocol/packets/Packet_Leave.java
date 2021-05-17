@@ -8,6 +8,9 @@ public class Packet_Leave extends Packet {
     private final PacketType type = PacketType.LEAVE;
     private String group;
 
+    public Packet_Leave() {
+    }
+
     public Packet_Leave(String group) {
         this.group = group;
     }

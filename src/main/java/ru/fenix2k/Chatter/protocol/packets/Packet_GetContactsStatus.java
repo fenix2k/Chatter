@@ -7,6 +7,9 @@ public class Packet_GetContactsStatus extends Packet {
 
     private final PacketType type = PacketType.GET_CONTACTS_STATUS;
 
+    public Packet_GetContactsStatus() {
+    }
+
     @Override
     public PacketType getType() {
         return type;

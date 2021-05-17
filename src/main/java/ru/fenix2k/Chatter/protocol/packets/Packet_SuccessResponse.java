@@ -9,6 +9,9 @@ public class Packet_SuccessResponse extends Packet {
     private final PacketType type = PacketType.SUCCESS;
     private String message;
 
+    public Packet_SuccessResponse() {
+    }
+
     public Packet_SuccessResponse(String message) {
         this.message = message;
     }
