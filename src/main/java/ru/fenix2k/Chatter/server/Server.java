@@ -1,6 +1,7 @@
 package ru.fenix2k.Chatter.server;
 
 import org.apache.log4j.Logger;
+import ru.fenix2k.Chatter.server.Utils.HibernateUtil;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -31,6 +32,7 @@ public class Server implements Runnable {
         }
         // Создаём серверный сокет
         openServerSocket();
+        HibernateUtil.getSessionFactory();
         // Цикл приёма входящих соединений
         while (!isStopped()) {
             // Клиентский сокет
@@ -50,6 +52,7 @@ public class Server implements Runnable {
             ClientWorker clientWorker = new ClientWorker(clientSocket);
             clientWorker.start();
         }
+        HibernateUtil.shutdown();
         log.info("Server stopped");
     }
 

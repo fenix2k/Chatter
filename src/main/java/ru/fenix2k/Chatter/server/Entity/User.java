@@ -4,13 +4,14 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "User")
 @Data
 @NoArgsConstructor
-public class User {
+public class User implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
@@ -29,7 +30,7 @@ public class User {
     private boolean isActive = false;
     @Column(name = "isVisible")
     private boolean isVisible = false;
-    @OneToOne
-    private Profile profile;
+    //@OneToOne
+    //private Profile profile;
 
 }

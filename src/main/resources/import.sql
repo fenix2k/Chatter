@@ -1,0 +1,5 @@
+INSERT INTO User (login, encryptedPassword, email, dtRegister, dtLastLogin, isActive, isVisible) VALUES ('admin', 'password', 'admin@mail.ru', '2021-01-01 12:00', '2021-05-01 12:00', true, true);
+INSERT INTO User (login, encryptedPassword, email, dtRegister, dtLastLogin, isActive, isVisible) VALUES ('user', '123', 'user@mail.ru', '2021-01-01 12:00', '2021-05-01 12:00', true, true);
+INSERT INTO User (login, encryptedPassword, email, dtRegister, dtLastLogin, isActive, isVisible) VALUES ('user1', '123', 'user1@mail.ru', '2021-01-01 12:00', '2021-05-01 12:00', true, true);
+INSERT INTO User (login, encryptedPassword, email, dtRegister, dtLastLogin, isActive, isVisible) VALUES ('user2', '123', 'user2@mail.ru', '2021-01-01 12:00', '2021-05-01 12:00', true, true);
+INSERT INTO User (login, encryptedPassword, email, dtRegister, dtLastLogin, isActive, isVisible) VALUES ('user3', '123', 'user3@mail.ru', '2021-01-01 12:00', '2021-05-01 12:00', true, true);
