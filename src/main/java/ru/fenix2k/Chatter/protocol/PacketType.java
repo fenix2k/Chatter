@@ -8,6 +8,7 @@ public enum PacketType {
     SEND_MSG,           // send <куда> <сообщение>, где <куда> - пользователь или несколько через запятую
     SEND_MSGGROUP,      // sendgroup <куда> <сообщение>, где <куда> - группа или несколько групп через запятую
     SEND_MSGALL,        // sendall <сообщение>
+    SEND_MSGSELF,       // sendself <сообщение>
 
     /** Client-Server commands **/
     CONNECT,            // connect <username> <password>
@@ -29,10 +30,10 @@ public enum PacketType {
     MESSAGE,            // <откуда> <сообщение> , где <откуда> - пользователь или несколько через запятую
     STATUS,             // <чей> <статус>
     USERINFO,           // <о ком?> <информация>
-    CONTACTS,           //
-    CONTACTS_STATUS,    //
-    INVITED,            //
-    KICKED,             //
+    CONTACTS,           // список контактов
+    CONTACTS_STATUS,    // список контактов со статусами
+    INVITED,            // оповещение о добавлении в группу
+    KICKED,             // оповещение об исключении из группы
     ERROR,              // <сообщение об ощибке>
     SUCCESS,            // <сообщение cервера>
     AUTHENTICATED,      // успешное сообщение об авторизации

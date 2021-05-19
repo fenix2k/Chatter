@@ -11,6 +11,11 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class ClientManager {
     private static final Logger log = Logger.getLogger(ClientManager.class);
+    public static final Map<String, String> users = Map.of(
+            "admin","password",
+            "user", "password",
+            "user1", "password");
+
     /** Содержит список сессий клиентов */
     private static Map<String, ClientWorker> sessions = new ConcurrentHashMap<>();
 

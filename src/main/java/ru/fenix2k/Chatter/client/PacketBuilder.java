@@ -33,7 +33,9 @@ public class PacketBuilder {
             case "connect"      -> buildConnectPacket(cmd);
             case "quit"         -> buildQuitPacket();
             case "sendmsg"      -> buildSendmsgPacket(cmd);
-            case "getcontacts"  -> buildGetContactsPacket(cmd);
+            case "sendmsgself"  -> buildSendmsgSelfPacket(cmd);
+            case "getcontacts"  -> buildGetContactsPacket();
+            case "getcontactsstatus"  -> buildGetContactsStatusPacket();
             case "getstatus"    -> buildGetStatusPacket(cmd);
             case "getuserinfo"  -> buildGetUserinfoPacket(cmd);
             case "addcontact"   -> buildAddContactPacket(cmd);
@@ -41,34 +43,86 @@ public class PacketBuilder {
         };
     }
 
+    /**
+     * Формирует пакет ADD_CONTACT
+     * @param cmd параметры
+     * @return пакет ADD_CONTACT
+     */
     private static Packet buildAddContactPacket(String[] cmd) {
-    }
-
-    private static Packet buildGetUserinfoPacket(String[] cmd) {
-    }
-
-    private static Packet buildGetStatusPacket(String[] cmd) {
-    }
-
-    private static Packet buildGetContactsPacket(String[] cmd) {
+        log.debug("Build packet ADD_CONTACT");
+        if(cmd.length == 2) {
+            String username = cmd[1].trim();
+            return PacketFactory.build(PacketType.ADD_CONTACT,
+                    Map.of("username", username));
+        }
+        throw new IllegalStateException("Invalid command");
     }
 
     /**
-     * Формирует пакет Packet_Quit
-     * @return пакет Packet_Quit
+     * Формирует пакет GET_USERINFO
+     * @param cmd параметры
+     * @return пакет GET_USERINFO
+     */
+    private static Packet buildGetUserinfoPacket(String[] cmd) {
+        log.debug("Build packet GET_USERINFO");
+        if(cmd.length == 2) {
+            String username = cmd[1].trim();
+            return PacketFactory.build(PacketType.GET_USERINFO,
+                    Map.of("username", username));
+        }
+        throw new IllegalStateException("Invalid command");
+    }
+
+    /**
+     * Формирует пакет GET_STATUS
+     * @param cmd параметры
+     * @return пакет GET_STATUS
+     */
+    private static Packet buildGetStatusPacket(String[] cmd) {
+        log.debug("Build packet GET_STATUS");
+        if(cmd.length == 2) {
+            String username = cmd[1].trim();
+            return PacketFactory.build(PacketType.GET_STATUS,
+                    Map.of("username", username));
+        }
+        throw new IllegalStateException("Invalid command");
+    }
+
+    /**
+     * Формирует пакет GET_CONTACTS
+     * @return пакет GET_CONTACTS
+     */
+    private static Packet buildGetContactsPacket() {
+        log.debug("Build packet GET_CONTACTS");
+        return PacketFactory.build(PacketType.GET_CONTACTS);
+    }
+
+    /**
+     * Формирует пакет GET_CONTACTS_STATUS
+     * @return пакет GET_CONTACTS_STATUS
+     */
+    private static Packet buildGetContactsStatusPacket() {
+        log.debug("Build packet GET_CONTACTS_STATUS");
+        return PacketFactory.build(PacketType.GET_CONTACTS_STATUS);
+    }
+
+    /**
+     * Формирует пакет QUIT
+     * @return пакет QUIT
      */
     private static Packet buildQuitPacket() {
-        log.debug("Build Packet_Quit");
+        log.debug("Build packet QUIT");
         return PacketFactory.build(PacketType.QUIT);
     }
 
     /**
-     * Формирует пакет Packet_Connect
-     * @return пакет Packet_Connect
+     * Формирует пакет CONNECT
+     * @param cmd параметры
+     * @return пакет CONNECT
      */
     private static Packet buildConnectPacket(String[] cmd)
             throws IllegalStateException {
-        log.debug("Build Packet_Connect");
+        log.debug("Build packet CONNECT");
         if(cmd.length == 3) {
             String username = cmd[1].trim();
             String password = cmd[2].trim();
@@ -79,17 +133,33 @@ public class PacketBuilder {
     }
 
     /**
-     * Формирует пакет Packet_SendMessage
-     * @return пакет Packet_SendMessage
+     * Формирует пакет SEND_MSG
+     * @param cmd параметры
+     * @return пакет SEND_MSG
      */
     private static Packet buildSendmsgPacket(String[] cmd)
             throws IllegalStateException {
-        log.debug("Build Packet_SendMessage");
+        log.debug("Build packet SEND_MSG");
         if(cmd.length == 3) {
             List<String> username = List.of(cmd[1].trim().split(","));
             String message = cmd[2].trim();
             return PacketFactory.build(PacketType.SEND_MSG,
                     Map.of("username", username, "message", message));
+        }
+        throw new IllegalStateException("Invalid command");
+    }
+
+    /**
+     * Формирует пакет SEND_MSGSELF
+     * @param cmd параметры
+     * @return пакет SEND_MSGSELF
+     */
+    private static Packet buildSendmsgSelfPacket(String[] cmd) {
+        log.debug("Build packet SEND_MSG");
+        if(cmd.length == 2) {
+            String message = cmd[1].trim();
+            return PacketFactory.build(PacketType.SEND_MSGSELF,
+                    Map.of("message", message));
         }
         throw new IllegalStateException("Invalid command");
     }

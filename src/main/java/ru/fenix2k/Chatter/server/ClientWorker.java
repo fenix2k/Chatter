@@ -93,7 +93,7 @@ public class ClientWorker implements Runnable {
      * @param packet пакет
      * @throws IOException
      */
-    private void sendPacket(Packet packet) throws IOException {
+    private void writePacket(Packet packet) throws IOException {
         oos.writeObject(packet);
     }
 
@@ -127,15 +127,15 @@ public class ClientWorker implements Runnable {
      */
     private void authenticateUser(Packet packet) throws IOException {
         log.debug("Receive packet: " + PacketType.CONNECT);
-        Packet_Connect packetConnectToServer = (Packet_Connect) packet;
-        if (packetConnectToServer.getUsername().equals("admin")
-                && packetConnectToServer.getPassword().equals("password")) {
-            log.debug("Authentication success: " + packetConnectToServer.getUsername());
+        Packet_Connect pktConnect = (Packet_Connect) packet;
+        if(ClientManager.users.containsKey(pktConnect.getUsername())
+                && ClientManager.users.get(pktConnect.getUsername()).equals(pktConnect.getPassword())) {
+            log.debug("Authentication success: " + pktConnect.getUsername());
             ClientManager.registerUserSession("admin", this);
-            sendPacket(new Packet_AuthenticatedResponse());
+            writePacket(new Packet_AuthenticatedResponse());
         } else {
-            log.debug("Authentication failed. Wrong credentials: " + packetConnectToServer.getUsername());
-            sendPacket(new Packet_ErrorResponse("Authentication failed. Wrong credentials"));
+            log.debug("Authentication failed. Wrong credentials: " + pktConnect.getUsername());
+            writePacket(new Packet_ErrorResponse("Authentication failed. Wrong credentials"));
         }
     }
 

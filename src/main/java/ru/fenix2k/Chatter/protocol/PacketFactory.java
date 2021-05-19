@@ -31,6 +31,7 @@ public class PacketFactory {
             case SEND_MSG       -> buildSendMsgPacket(params);
             case SEND_MSGALL    -> buildSendMsgAllPacket(params);
             case SEND_MSGGROUP  -> buildSendMsgGroupPacket(params);
+            case SEND_MSGSELF   -> buildSendMsgSelfPacket(params);
 
             case USERINFO       -> buildUserinfoPacket(params);
             case GET_USERINFO   -> buildGetUserinfoPacket(params);
@@ -97,8 +98,8 @@ public class PacketFactory {
     private static Packet buildInvitePacket(Map<String, Object> params) {
         if(params.isEmpty())
             return new Packet_Invite();
-        checkStringParametersByKey(params, List.of("group", "user"));
-        return new Packet_Invite(params.get("group").toString(), params.get("user").toString());
+        checkStringParametersByKey(params, List.of("group", "username"));
+        return new Packet_Invite(params.get("group").toString(), params.get("username").toString());
     }
 
     private static Packet buildKickedPacket(Map<String, Object> params) {
@@ -111,8 +112,8 @@ public class PacketFactory {
     private static Packet buildKickPacket(Map<String, Object> params) {
         if(params.isEmpty())
             return new Packet_Kick();
-        checkStringParametersByKey(params, List.of("group", "user"));
-        return new Packet_Kick(params.get("group").toString(), params.get("user").toString());
+        checkStringParametersByKey(params, List.of("group", "username"));
+        return new Packet_Kick(params.get("group").toString(), params.get("username").toString());
     }
 
     private static Packet buildGetGroupsMembersPacket(Map<String, Object> params) {
@@ -139,15 +140,15 @@ public class PacketFactory {
     private static Packet buildRemoveContactPacket(Map<String, Object> params) {
         if(params.isEmpty())
             return new Packet_RemoveContact();
-        checkStringParametersByKey(params, List.of("user"));
-        return new Packet_RemoveContact(params.get("user").toString());
+        checkStringParametersByKey(params, List.of("username"));
+        return new Packet_RemoveContact(params.get("username").toString());
     }
 
     private static Packet buildAddContactPacket(Map<String, Object> params) {
         if(params.isEmpty())
             return new Packet_AddContact();
-        checkStringParametersByKey(params, List.of("user"));
-        return new Packet_AddContact(params.get("user").toString());
+        checkStringParametersByKey(params, List.of("username"));
+        return new Packet_AddContact(params.get("username").toString());
     }
 
     private static Packet buildContactsStatusPacket(Map<String, Object> params) {
@@ -167,8 +168,8 @@ public class PacketFactory {
     private static Packet buildGetUserinfoPacket(Map<String, Object> params) {
         if(params.isEmpty())
             return new Packet_GetUserinfo();
-        checkStringParametersByKey(params, List.of("user"));
-        return new Packet_GetUserinfo(params.get("user").toString());
+        checkStringParametersByKey(params, List.of("username"));
+        return new Packet_GetUserinfo(params.get("username").toString());
     }
 
     private static Packet buildUserinfoPacket(Map<String, Object> params) {
@@ -176,6 +177,13 @@ public class PacketFactory {
             return new Packet_UserinfoResponse();
         checkStringParametersByKey(params, List.of("userinfo"));
         return new Packet_UserinfoResponse(params.get("userinfo").toString());
+    }
+
+    private static Packet buildSendMsgSelfPacket(Map<String, Object> params) {
+        if(params.isEmpty())
+            return new Packet_SendMsgSelf();
+        checkStringParametersByKey(params, List.of("message"));
+        return new Packet_SendMsgSelf(params.get("message").toString());
     }
 
     private static Packet buildSendMsgGroupPacket(Map<String, Object> params) {
@@ -217,15 +225,15 @@ public class PacketFactory {
     private static Packet buildGetStatusPacket(Map<String, Object> params) {
         if(params.isEmpty())
             return new Packet_GetStatus();
-        checkStringParametersByKey(params, List.of("user"));
-        return new Packet_GetStatus(params.get("user").toString());
+        checkStringParametersByKey(params, List.of("username"));
+        return new Packet_GetStatus(params.get("username").toString());
     }
 
     private static Packet buildStatusPacket(Map<String, Object> params) {
         if(params.isEmpty())
             return new Packet_Message();
-        checkStringParametersByKey(params, List.of("user", "status"));
-        return new Packet_Message(params.get("user").toString(), params.get("status").toString());
+        checkStringParametersByKey(params, List.of("username", "status"));
+        return new Packet_Message(params.get("username").toString(), params.get("status").toString());
     }
 
     private static Packet buildSuccessPacket(Map<String, Object> params) {
