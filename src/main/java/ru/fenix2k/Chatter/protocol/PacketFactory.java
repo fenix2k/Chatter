@@ -2,6 +2,8 @@ package ru.fenix2k.Chatter.protocol;
 
 import org.apache.log4j.Logger;
 import ru.fenix2k.Chatter.protocol.packets.*;
+import ru.fenix2k.Chatter.server.Entity.User;
+import ru.fenix2k.Chatter.server.EntityView.UserView;
 
 import java.security.InvalidParameterException;
 import java.util.List;
@@ -162,7 +164,7 @@ public class PacketFactory {
         if(params.isEmpty())
             return new Packet_ContactsResponse();
         checkListParametersByKey(params, List.of("contacts"));
-        return new Packet_ContactsResponse((List<String>) params.get("contacts"));
+        return new Packet_ContactsResponse((List<UserView>) params.get("contacts"));
     }
 
     private static Packet buildGetUserinfoPacket(Map<String, Object> params) {

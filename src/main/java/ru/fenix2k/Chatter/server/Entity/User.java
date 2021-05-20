@@ -1,5 +1,6 @@
 package ru.fenix2k.Chatter.server.Entity;
 
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -11,6 +12,7 @@ import java.time.LocalDateTime;
 @Table(name = "User")
 @Data
 @NoArgsConstructor
+@Builder
 public class User implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

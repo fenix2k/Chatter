@@ -3,9 +3,10 @@ package ru.fenix2k.Chatter.server;
 import org.apache.log4j.Logger;
 import ru.fenix2k.Chatter.protocol.Packet;
 import ru.fenix2k.Chatter.protocol.PacketType;
-import ru.fenix2k.Chatter.protocol.packets.Packet_AuthenticatedResponse;
-import ru.fenix2k.Chatter.protocol.packets.Packet_Connect;
-import ru.fenix2k.Chatter.protocol.packets.Packet_ErrorResponse;
+import ru.fenix2k.Chatter.protocol.packets.*;
+import ru.fenix2k.Chatter.server.DAO.UserDAO;
+import ru.fenix2k.Chatter.server.DAO.UserDAOImpl;
+import ru.fenix2k.Chatter.server.Service.UserService;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -28,9 +29,14 @@ public class ClientWorker implements Runnable {
     protected ObjectOutputStream oos = null;
     /** Потокобезопасная переменная для останоки потока **/
     private final AtomicBoolean running = new AtomicBoolean(false);
+    /** ИД пакета. Нужен для отслеживания получения ответа сервера **/
+    private int packetId = 100;
+
+    private final UserService userService;
 
     public ClientWorker(Socket clientSocket) {
         this.clientSocket = clientSocket;
+        this.userService = new UserService();
     }
 
     /**
@@ -65,15 +71,12 @@ public class ClientWorker implements Runnable {
             oos = new ObjectOutputStream(clientSocket.getOutputStream());
             // Цикл получения пакетов от клиентов и их обработка
             while (running.get()) {
-                Packet packet = readPacket();
-                processingPacket(packet);
+                processingPacket(readPacket());
             }
             // Закрываем стримы
             oos.close();
             ois.close();
-        } catch (ClassNotFoundException e) {
-            log.info(e.getMessage(), e);
-        } catch (IOException e) {
+        } catch (ClassNotFoundException | IOException e) {
             log.info(e.getMessage(), e);
         }
     }
@@ -85,7 +88,9 @@ public class ClientWorker implements Runnable {
      * @throws IOException
      */
     private Packet readPacket() throws ClassNotFoundException, IOException {
-        return (Packet) ois.readObject();
+        Packet packet = (Packet) ois.readObject();
+        packetId = packet.getId();
+        return packet;
     }
 
     /**
@@ -94,6 +99,7 @@ public class ClientWorker implements Runnable {
      * @throws IOException
      */
     private void writePacket(Packet packet) throws IOException {
+        packet.setId(packetId);
         oos.writeObject(packet);
     }
 
@@ -104,11 +110,18 @@ public class ClientWorker implements Runnable {
      */
     private void processingPacket(Packet packet) throws IOException {
         switch (packet.getType()) {
-            case CONNECT -> authenticateUser(packet);
-            case QUIT -> closeConnection();
-            case SEND_MSG -> sendMessage(packet);
+            case CONNECT        -> authenticateUser(packet);
+            case QUIT           -> closeConnection();
+            case SEND_MSG       -> sendMessage(packet);
+            case GET_CONTACTS   -> getContacts(packet);
             default -> throw new IllegalStateException("Invalid packet type: " + packet.getType());
         }
+    }
+
+    private void getContacts(Packet packet) throws IOException {
+        if(!(packet instanceof Packet_GetContacts))
+            throw new ClassCastException();
+        writePacket(new Packet_ContactsResponse(userService.findAll()));
     }
 
     /**

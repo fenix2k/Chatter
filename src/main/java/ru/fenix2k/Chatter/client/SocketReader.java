@@ -107,10 +107,12 @@ public class SocketReader implements Runnable {
         else {
             // Если пакета нет в списке ожидания, то прерываем оработку пакета
             if(!client.packetResponseWaitingList.containsKey(packet.getId())) {
-                log.warn("Received packet was not expected: " + packet.getId() + "[" + packet.getType() + "]");
+                log.warn("Received packet was not expected: ID=" + packet.getId() + " [" + packet.getType() + "]");
                 return;
             }
             Packet sentPacket = client.packetResponseWaitingList.get(packet.getId());
+            // Удаляем пакет из списка ожидания ответа
+            client.packetResponseWaitingList.remove(sentPacket.getId());
             // получен ответ на запрос от сервера
             log.debug("Response packet received");
             switch(packet.getType()) {
@@ -124,8 +126,7 @@ public class SocketReader implements Runnable {
                 default -> throw new IllegalStateException("Unknown command: " + packet.getType());
             };
 
-            // Удаляем пакет из списка ожидания ответа
-            client.packetResponseWaitingList.remove(packet.getId());
+
         }
     }
 
