@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "Profile")
@@ -18,9 +19,19 @@ public class Profile {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private long id;
+
+    @Column(name = "sys_dt_created")
+    private LocalDateTime sys_created;
+    @Column(name = "sys_dt_modified")
+    private LocalDateTime sys_modified;
+    @Column(name = "sys_removed")
+    private Boolean sys_removed = false;
+
     @Column(name = "firstName")
     private String firstName;
     @Column(name = "lastName")
     private String lastName;
+    @Column(name = "birthdate")
+    private String birthdate;
 
 }

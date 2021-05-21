@@ -7,6 +7,7 @@ import ru.fenix2k.Chatter.server.ClientWorker;
 import ru.fenix2k.Chatter.server.Entity.User;
 import ru.fenix2k.Chatter.server.Utils.HibernateUtil;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public class UserDAOImpl implements UserDAO {
@@ -36,26 +37,26 @@ public class UserDAOImpl implements UserDAO {
     @Override
     public User save(User user) {
         Session session = HibernateUtil.getSessionFactory().openSession();
-        Transaction transaction = session.beginTransaction();
+        user.setSys_created(LocalDateTime.now());
         session.saveOrUpdate(user);
-        transaction.commit();
         session.close();
         return user;
     }
 
     @Override
-    public void update(User user) {
+    public User update(User user) {
         Session session = HibernateUtil.getSessionFactory().openSession();
-        Transaction transaction = session.beginTransaction();
+        user.setSys_modified(LocalDateTime.now());
         session.update(user);
-        transaction.commit();
         session.close();
+        return user;
     }
 
     @Override
-    public void delete(User user) {
+    public void remove(User user) {
         Session session = HibernateUtil.getSessionFactory().openSession();
-        session.delete(user);
+        user.setSys_removed(true);
+        session.update(user);
         session.close();
     }
 
