@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Класс клиента
@@ -34,9 +35,9 @@ public class Client {
     /** поток для приёма */
     private SocketReader socketReader;
     /** Очередь пакетов на отправку */
-    public final BlockingQueue<Packet> writingPacketQueue = new LinkedBlockingQueue<>();
+    private final BlockingQueue<Packet> writingPacketQueue = new LinkedBlockingQueue<>();
     /** Очередь пакетов на обработку */
-    public final BlockingQueue<Packet> processingPacketQueue = new LinkedBlockingQueue<>();
+    private final BlockingQueue<Packet> processingPacketQueue = new LinkedBlockingQueue<>();
     /** Хранит id и timestamp отправки отправленных пакетов на которые ожидается ответ */
     public final Map<Integer, Packet> packetResponseWaitingList = new ConcurrentHashMap<>();
 
@@ -93,6 +94,23 @@ public class Client {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    /**
+     * Помещение пакета в очередь отправки
+     * @param packet пакет
+     */
+    public void sendPacket(Packet packet) {
+        writingPacketQueue.add(packet);
+    }
+
+    /**
+     * Получение пакета из очереди отправки
+     * @return пакет
+     * @throws InterruptedException
+     */
+    public Packet receivePacket() throws InterruptedException {
+        return writingPacketQueue.poll(100, TimeUnit.MILLISECONDS);
     }
 
 }

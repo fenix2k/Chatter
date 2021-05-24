@@ -73,7 +73,7 @@ public class ConsoleReader implements Runnable {
                 // Парсим команду и создаём соответствующий пакет
                 packet = PacketBuilder.buildFromCommand(command);
                 // Пишем пакет в очередь отправки
-                client.writingPacketQueue.add(packet);
+                client.sendPacket(packet);
             } catch (IllegalStateException ex) {
                 if(!ex.getMessage().isEmpty())
                     System.out.println("Unknown command: " + ex.getMessage());

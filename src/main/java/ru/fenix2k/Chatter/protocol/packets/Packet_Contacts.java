@@ -3,20 +3,18 @@ package ru.fenix2k.Chatter.protocol.packets;
 
 import ru.fenix2k.Chatter.protocol.Packet;
 import ru.fenix2k.Chatter.protocol.PacketType;
-import ru.fenix2k.Chatter.server.Entity.User;
-import ru.fenix2k.Chatter.server.EntityView.UserView;
 
 import java.util.List;
 
-public class Packet_ContactsResponse extends Packet {
+public class Packet_Contacts extends Packet {
 
     private final PacketType type = PacketType.CONTACTS;
-    private List<UserView> contacts;
+    private List<String> contacts;
 
-    public Packet_ContactsResponse() {
+    public Packet_Contacts() {
     }
 
-    public Packet_ContactsResponse(List<UserView> contacts) {
+    public Packet_Contacts(List<String> contacts) {
         this.contacts = contacts;
     }
 
@@ -25,7 +23,7 @@ public class Packet_ContactsResponse extends Packet {
         return type;
     }
 
-    public List<UserView> getContacts() {
+    public List<String> getContacts() {
         return contacts;
     }
 }

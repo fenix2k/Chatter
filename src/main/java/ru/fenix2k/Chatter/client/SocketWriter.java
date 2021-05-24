@@ -72,7 +72,7 @@ public class SocketWriter implements Runnable {
         while (running.get()) {
             try {
                 // вытаскиваем пакет из очереди (блокирующая операция)
-                packet = client.writingPacketQueue.poll(100, TimeUnit.MILLISECONDS);
+                packet = client.receivePacket();
                 if(packet == null) continue;
 
                 packet.setId(getNextId());

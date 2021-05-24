@@ -25,6 +25,7 @@ public enum PacketType {
     KICK,               // kick <groupname> <username>
     LEAVE,              // leave <group>
     GET_GROUPMEMBERS,   // groupmembers <groupname>
+    GET_SESSIONS,       // getsessions
 
     /** Server-Client commands **/
     MESSAGE,            // <откуда> <сообщение> , где <откуда> - пользователь или несколько через запятую
@@ -32,11 +33,13 @@ public enum PacketType {
     USERINFO,           // <о ком?> <информация>
     CONTACTS,           // список контактов
     CONTACTS_STATUS,    // список контактов со статусами
+    SESSIONS,           // список активных пользователей
     INVITED,            // оповещение о добавлении в группу
     KICKED,             // оповещение об исключении из группы
     ERROR,              // <сообщение об ощибке>
     SUCCESS,            // <сообщение cервера>
-    AUTHENTICATED,      // успешное сообщение об авторизации
+    AUTH_SUCCESS,       // успешное сообщение об авторизации
+    AUTH_FAIL,          // успешное сообщение об авторизации
     SQUIT,              // принудительное отключение от сервера
 
 }

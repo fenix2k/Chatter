@@ -4,15 +4,15 @@ package ru.fenix2k.Chatter.protocol.packets;
 import ru.fenix2k.Chatter.protocol.Packet;
 import ru.fenix2k.Chatter.protocol.PacketType;
 
-public class Packet_SuccessResponse extends Packet {
+public class Packet_Success extends Packet {
 
     private final PacketType type = PacketType.SUCCESS;
     private String message;
 
-    public Packet_SuccessResponse() {
+    public Packet_Success() {
     }
 
-    public Packet_SuccessResponse(String message) {
+    public Packet_Success(String message) {
         this.message = message;
     }
 

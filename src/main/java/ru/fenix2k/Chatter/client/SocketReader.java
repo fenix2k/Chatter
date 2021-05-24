@@ -116,7 +116,8 @@ public class SocketReader implements Runnable {
             // получен ответ на запрос от сервера
             log.debug("Response packet received");
             switch(packet.getType()) {
-                case AUTHENTICATED  -> handleAuthenticatedPacket(sentPacket, packet);
+                case AUTH_SUCCESS   -> handleAuthSuccessPacket(sentPacket, packet);
+                case AUTH_FAIL      -> handleAuthFailPacket(sentPacket, packet);
                 case ERROR          -> handleErrorPacket(sentPacket, packet);
                 case SUCCESS        -> handleSuccessPacket(sentPacket, packet);
                 case STATUS         -> handleStatusPacket(sentPacket, packet);
@@ -152,8 +153,8 @@ public class SocketReader implements Runnable {
             throws IllegalIdentifierException, ClassCastException {
         log.debug("Handle CONTACTS_STATUS packet");
         this.checkPacketType(sentPacket, PacketType.GET_CONTACTS_STATUS);
-        if(rcvPacket instanceof Packet_ContactsStatusResponse) {
-            var pkt = (Packet_ContactsStatusResponse) rcvPacket;
+        if(rcvPacket instanceof Packet_ContactsStatus) {
+            var pkt = (Packet_ContactsStatus) rcvPacket;
             System.out.println("Your CONTACTS with statuses: " + pkt.getContacts());
             // дописать обработку
         } else
@@ -168,8 +169,8 @@ public class SocketReader implements Runnable {
             throws IllegalIdentifierException, ClassCastException {
         log.debug("Handle CONTACTS packet");
         this.checkPacketType(sentPacket, PacketType.GET_CONTACTS);
-        if(rcvPacket instanceof Packet_ContactsResponse) {
-            var pkt = (Packet_ContactsResponse) rcvPacket;
+        if(rcvPacket instanceof Packet_Contacts) {
+            var pkt = (Packet_Contacts) rcvPacket;
             System.out.println("Your CONTACTS: " + pkt.getContacts());
             // дописать обработку
         } else
@@ -240,8 +241,8 @@ public class SocketReader implements Runnable {
     private void handleUserinfoPacket(Packet sentPacket, Packet rcvPacket)
             throws IllegalIdentifierException, ClassCastException {
         log.debug("Handle INFO packet");
-        if(rcvPacket instanceof Packet_UserinfoResponse) {
-            var pkt = (Packet_UserinfoResponse) rcvPacket;
+        if(rcvPacket instanceof Packet_Userinfo) {
+            var pkt = (Packet_Userinfo) rcvPacket;
             System.out.println("USERINFO: " + pkt.getUserinfo());
             // дописать обработку
         } else
@@ -257,8 +258,8 @@ public class SocketReader implements Runnable {
             throws IllegalIdentifierException, ClassCastException {
         log.debug("Handle STATUS packet");
         this.checkPacketType(sentPacket, PacketType.GET_STATUS);
-        if(rcvPacket instanceof Packet_StatusResponse) {
-            var pkt = (Packet_StatusResponse) rcvPacket;
+        if(rcvPacket instanceof Packet_Status) {
+            var pkt = (Packet_Status) rcvPacket;
             System.out.println("User " + pkt.getUser() + " has status " + pkt.getStatus());
             // дописать обработку
         } else
@@ -274,8 +275,8 @@ public class SocketReader implements Runnable {
             throws IllegalIdentifierException, ClassCastException {
         log.debug("Handle ERROR packet");
         //this.checkPacketType(sentPacket, PacketType.GET_CONTACTS_STATUS);
-        if(rcvPacket instanceof Packet_ErrorResponse) {
-            var pkt = (Packet_ErrorResponse) rcvPacket;
+        if(rcvPacket instanceof Packet_Error) {
+            var pkt = (Packet_Error) rcvPacket;
             System.out.println("The server responded with an error:" + pkt.getMessage() + ". Previous request: " + sentPacket.getType());
             // дописать обработку
         } else
@@ -291,8 +292,8 @@ public class SocketReader implements Runnable {
             throws IllegalIdentifierException, ClassCastException {
         log.debug("Handle SUCCESS packet");
         //this.checkPacketType(sentPacket, PacketType.GET_CONTACTS_STATUS);
-        if(rcvPacket instanceof Packet_SuccessResponse) {
-            var pkt = (Packet_SuccessResponse) rcvPacket;
+        if(rcvPacket instanceof Packet_Success) {
+            var pkt = (Packet_Success) rcvPacket;
             System.out.println("The server responded success:" + pkt.getMessage() + ". Previous request: " + sentPacket.getType());
             // дописать обработку
         } else
@@ -300,16 +301,31 @@ public class SocketReader implements Runnable {
     }
 
     /**
-     * Обрабатывает пакет AUTHENTICATED
+     * Обрабатывает пакет AUTH_SUCCESS
      * @param sentPacket отправленный пакет
      * @param rcvPacket полученный пакет
      */
-    private void handleAuthenticatedPacket(Packet sentPacket, Packet rcvPacket)
+    private void handleAuthSuccessPacket(Packet sentPacket, Packet rcvPacket)
             throws IllegalIdentifierException, ClassCastException {
-        log.debug("Handle AUTHENTICATED packet");
+        log.debug("Handle AUTH_SUCCESS packet");
         this.checkPacketType(sentPacket, PacketType.CONNECT);
-        if(rcvPacket instanceof Packet_SuccessResponse) {
-            client.writingPacketQueue.add(new Packet_GetContactsStatus());
+        if(rcvPacket instanceof Packet_AuthSuccess) {
+            client.sendPacket(new Packet_GetContacts());
+        } else
+            throw new ClassCastException("Packet type is wrong: " + rcvPacket.getType());
+    }
+
+    /**
+     * Обрабатывает пакет AUTH_FAIL
+     * @param sentPacket отправленный пакет
+     * @param rcvPacket полученный пакет
+     */
+    private void handleAuthFailPacket(Packet sentPacket, Packet rcvPacket) {
+        log.debug("Handle AUTH_FAIL packet");
+        this.checkPacketType(sentPacket, PacketType.CONNECT);
+        if(rcvPacket instanceof Packet_AuthFail) {
+            var pkt = (Packet_AuthFail) rcvPacket;
+            System.out.println("Authentication failed with error:" + pkt.getMessage());
         } else
             throw new ClassCastException("Packet type is wrong: " + rcvPacket.getType());
     }

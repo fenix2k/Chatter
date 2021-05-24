@@ -1,7 +1,10 @@
 package ru.fenix2k.Chatter.server;
 
 import org.apache.log4j.Logger;
+import ru.fenix2k.Chatter.server.Entity.User;
+import ru.fenix2k.Chatter.server.Service.UserService;
 
+import javax.naming.AuthenticationException;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -11,13 +14,10 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class ClientManager {
     private static final Logger log = Logger.getLogger(ClientManager.class);
-    public static final Map<String, String> users = Map.of(
-            "admin","password",
-            "user", "password",
-            "user1", "password");
+    private static final UserService userService = new UserService();
 
     /** Содержит список сессий клиентов */
-    private static Map<String, ClientWorker> sessions = new ConcurrentHashMap<>();
+    private static final Map<String, ClientWorker> sessions = new ConcurrentHashMap<>();
 
     /**
      * Регистрация новой сессии
@@ -64,5 +64,16 @@ public class ClientManager {
     public static Map<String, ClientWorker> getSessions() {
         log.debug("Get users sessions request");
         return sessions;
+    }
+
+    public static User authenticate(String username, String password) throws AuthenticationException {
+        User user = userService.findByLogin(username);
+        if(user == null)
+            throw new AuthenticationException("Login not found");
+        if(user.getEncryptedPassword().equals(password)) {
+            return user;
+        }
+        else
+            throw new AuthenticationException("Password do not match");
     }
 }

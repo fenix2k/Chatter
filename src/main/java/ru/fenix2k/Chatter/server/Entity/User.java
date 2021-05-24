@@ -1,5 +1,6 @@
 package ru.fenix2k.Chatter.server.Entity;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -8,6 +9,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import ru.fenix2k.Chatter.server.View.Views;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -22,43 +24,53 @@ import java.time.LocalDateTime;
 public class User implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
+    @JsonView(Views.Min.class)
     private long id;
 
-    @Column(name = "sys_dt_created")
+    @JsonView(Views.Full.class)
     private LocalDateTime sys_created;
-    @Column(name = "sys_dt_modified")
+    @JsonView(Views.Full.class)
     private LocalDateTime sys_modified;
-    @Column(name = "sys_removed")
+    @JsonView(Views.Full.class)
     private Boolean sys_removed = false;
 
-    @Column(name = "login")
     @NotEmpty
     @Size(min = 2, max = 100)
+    @JsonView(Views.Min.class)
     private String login;
 
-    @Column(name = "encryptedPassword")
+    @JsonView(Views.Full.class)
     private String encryptedPassword;
 
-    @Column(name = "email")
     @NotEmpty
     @Email
+    @JsonView(Views.Min.class)
     private String email;
 
-    @Column(name = "dtRegister")
+    @JsonView(Views.Middle.class)
     private LocalDateTime dtRegister;
-
-    @Column(name = "dtLastLogin")
+    @JsonView(Views.Middle.class)
     private LocalDateTime dtLastLogin;
 
-    @Column(name = "isActive")
     @NotNull
+    @JsonView(Views.Min.class)
     private Boolean isActive = false;
 
-    @Column(name = "isVisible")
     @NotNull
+    @JsonView(Views.Full.class)
     private Boolean isVisible = false;
     //@OneToOne
     //private Profile profile;
 
+
+    public User(long id, String login, String encryptedPassword, String email, LocalDateTime dtRegister, LocalDateTime dtLastLogin, Boolean isActive, Boolean isVisible) {
+        this.id = id;
+        this.login = login;
+        this.encryptedPassword = encryptedPassword;
+        this.email = email;
+        this.dtRegister = dtRegister;
+        this.dtLastLogin = dtLastLogin;
+        this.isActive = isActive;
+        this.isVisible = isVisible;
+    }
 }

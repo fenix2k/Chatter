@@ -1,4 +1,4 @@
-package ru.fenix2k.Chatter.server.EntityView;
+package ru.fenix2k.Chatter.server.View;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

@@ -1,12 +1,12 @@
 package ru.fenix2k.Chatter.server.Service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.ConstraintViolation;
 import org.apache.log4j.Logger;
 import ru.fenix2k.Chatter.server.DAO.UserDAO;
 import ru.fenix2k.Chatter.server.DAO.UserDAOImpl;
 import ru.fenix2k.Chatter.server.Entity.User;
-import ru.fenix2k.Chatter.server.EntityView.UserView;
-import ru.fenix2k.Chatter.server.EntityView.ValidationErrorView;
+import ru.fenix2k.Chatter.server.View.ValidationErrorView;
 import ru.fenix2k.Chatter.server.Exception.EntityValidationException;
 import ru.fenix2k.Chatter.server.Utils.BeanUtil;
 
@@ -17,6 +17,8 @@ import java.util.stream.Collectors;
 public class UserService {
     private static final Logger log = Logger.getLogger(UserService.class);
     private final UserDAO userDAO;
+    /** JSON Mapper */
+    private ObjectMapper jsonMapper = new ObjectMapper();
 
     public UserService() {
         this.userDAO = new UserDAOImpl();
@@ -34,58 +36,32 @@ public class UserService {
         return entity;
     }
 
-    public static UserView convertUserToUserView(User user) throws EntityValidationException {
-        return validate(UserView.builder()
-                .id(user.getId())
-                .login(user.getLogin())
-                .email(user.getEmail())
-                .dtLastLogin(user.getDtLastLogin())
-                .dtRegister(user.getDtRegister())
-                .isActive(user.getIsActive())
-                .isVisible(user.getIsVisible())
-                .build());
+    public User findById(Long id) {
+        return userDAO.findById(id);
     }
 
-    public static User convertUserViewToUser(UserView userView) throws EntityValidationException {
-        return validate(User.builder()
-                .id(userView.getId())
-                .login(userView.getLogin())
-                .email(userView.getEmail())
-                .dtLastLogin(userView.getDtLastLogin())
-                .dtRegister(userView.getDtRegister())
-                .isActive(userView.getIsActive())
-                .isVisible(userView.getIsVisible())
-                .build());
+    public User findByLogin(String login) {
+        return userDAO.findByLogin(login);
     }
 
-    public UserView findById(Long id) throws EntityValidationException {
-        return convertUserToUserView(userDAO.findById(id));
+    public User findByEmail(String email) {
+        return userDAO.findByEmail(email);
     }
 
-    public UserView findByLogin(String login) throws EntityValidationException {
-        return convertUserToUserView(userDAO.findByLogin(login));
+    public User save(User user) throws EntityValidationException {
+        return userDAO.save(validate(user));
     }
 
-    public UserView findByEmail(String email) throws EntityValidationException {
-        return convertUserToUserView(userDAO.findByEmail(email));
+    public User update(User user) throws EntityValidationException {
+        return userDAO.update(validate(user));
     }
 
-    public UserView save(UserView userView) throws EntityValidationException {
-        return convertUserToUserView(userDAO.save(convertUserViewToUser(userView)));
+    public void remove(User user) throws EntityValidationException {
+        userDAO.remove(validate(user));
     }
 
-    public UserView update(UserView userView) throws EntityValidationException {
-        return convertUserToUserView(userDAO.update(convertUserViewToUser(userView)));
+    public List<User> findAll() {
+        return userDAO.findAll();
     }
 
-    public void remove(UserView userView) {
-        userDAO.remove(convertUserViewToUser(userView));
-    }
-
-    public List<UserView> findAll() {
-        return userDAO
-                .findAll().stream()
-                .map(UserService::convertUserToUserView)
-                .collect(Collectors.toList());
-    }
 }

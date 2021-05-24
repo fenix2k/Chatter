@@ -4,15 +4,15 @@ package ru.fenix2k.Chatter.protocol.packets;
 import ru.fenix2k.Chatter.protocol.Packet;
 import ru.fenix2k.Chatter.protocol.PacketType;
 
-public class Packet_UserinfoResponse extends Packet {
+public class Packet_Userinfo extends Packet {
 
     private final PacketType type = PacketType.USERINFO;
     private String userinfo;
 
-    public Packet_UserinfoResponse() {
+    public Packet_Userinfo() {
     }
 
-    public Packet_UserinfoResponse(String userinfo) {
+    public Packet_Userinfo(String userinfo) {
         this.userinfo = userinfo;
     }
 

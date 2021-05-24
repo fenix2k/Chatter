@@ -2,8 +2,6 @@ package ru.fenix2k.Chatter.protocol;
 
 import org.apache.log4j.Logger;
 import ru.fenix2k.Chatter.protocol.packets.*;
-import ru.fenix2k.Chatter.server.Entity.User;
-import ru.fenix2k.Chatter.server.EntityView.UserView;
 
 import java.security.InvalidParameterException;
 import java.util.List;
@@ -21,7 +19,8 @@ public class PacketFactory {
             case QUIT           -> new Packet_Quit();
             case SQUIT          -> new Packet_SQuit();
             case CONNECT        -> buildConnectPacket(params);
-            case AUTHENTICATED  -> new Packet_AuthenticatedResponse();
+            case AUTH_SUCCESS   -> new Packet_AuthSuccess();
+            case AUTH_FAIL      -> buildAuthFailPacket(params);
             case ERROR          -> buildErrorPacket(params);
             case SUCCESS        -> buildSuccessPacket(params);
 
@@ -42,6 +41,8 @@ public class PacketFactory {
             case CONTACTS_STATUS -> buildContactsStatusPacket(params);
             case GET_CONTACTS   -> new Packet_GetContacts();
             case GET_CONTACTS_STATUS -> new Packet_GetContactsStatus();
+            case GET_SESSIONS   -> new Packet_GetSessions();
+            case SESSIONS       -> buildSessionsPacket(params);
             case ADD_CONTACT    -> buildAddContactPacket(params);
             case REMOVE_CONTACT -> buildRemoveContactPacket(params);
 
@@ -53,6 +54,13 @@ public class PacketFactory {
             case INVITE         -> buildInvitePacket(params);
             case INVITED        -> buildInvitedPacket(params);
         };
+    }
+
+    private static Packet buildAuthFailPacket(Map<String, Object> params) {
+        if(params.isEmpty())
+            return new Packet_Invited();
+        checkStringParametersByKey(params, List.of("message"));
+        return new Packet_Invited(params.get("message").toString());
     }
 
     private static void checkStringParametersByKey(Map<String, Object> params, List<String> keys) throws InvalidParameterException {
@@ -155,16 +163,23 @@ public class PacketFactory {
 
     private static Packet buildContactsStatusPacket(Map<String, Object> params) {
         if(params.isEmpty())
-            return new Packet_ContactsStatusResponse();
+            return new Packet_ContactsStatus();
         checkMapParametersByKey(params, List.of("contacts"));
-        return new Packet_ContactsStatusResponse((Map<String, String>) params.get("contacts"));
+        return new Packet_ContactsStatus((Map<String, String>) params.get("contacts"));
     }
 
     private static Packet buildContactsPacket(Map<String, Object> params) {
         if(params.isEmpty())
-            return new Packet_ContactsResponse();
+            return new Packet_Contacts();
         checkListParametersByKey(params, List.of("contacts"));
-        return new Packet_ContactsResponse((List<UserView>) params.get("contacts"));
+        return new Packet_Contacts((List<String>) params.get("contacts"));
+    }
+
+    private static Packet buildSessionsPacket(Map<String, Object> params) {
+        if(params.isEmpty())
+            return new Packet_Contacts();
+        checkListParametersByKey(params, List.of("sessions"));
+        return new Packet_Contacts((List<String>) params.get("sessions"));
     }
 
     private static Packet buildGetUserinfoPacket(Map<String, Object> params) {
@@ -176,9 +191,9 @@ public class PacketFactory {
 
     private static Packet buildUserinfoPacket(Map<String, Object> params) {
         if(params.isEmpty())
-            return new Packet_UserinfoResponse();
+            return new Packet_Userinfo();
         checkStringParametersByKey(params, List.of("userinfo"));
-        return new Packet_UserinfoResponse(params.get("userinfo").toString());
+        return new Packet_Userinfo(params.get("userinfo").toString());
     }
 
     private static Packet buildSendMsgSelfPacket(Map<String, Object> params) {
@@ -240,16 +255,16 @@ public class PacketFactory {
 
     private static Packet buildSuccessPacket(Map<String, Object> params) {
         if(params.isEmpty())
-            return new Packet_SuccessResponse();
+            return new Packet_Success();
         checkStringParametersByKey(params, List.of("message"));
-        return new Packet_SuccessResponse(params.get("message").toString());
+        return new Packet_Success(params.get("message").toString());
     }
 
     private static Packet buildErrorPacket(Map<String, Object> params) {
         if(params.isEmpty())
-            return new Packet_ErrorResponse();
+            return new Packet_Error();
         checkStringParametersByKey(params, List.of("message"));
-        return new Packet_ErrorResponse(params.get("message").toString());
+        return new Packet_Error(params.get("message").toString());
     }
 
     private static Packet buildConnectPacket(Map<String, Object> params) {

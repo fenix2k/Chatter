@@ -1,6 +1,6 @@
 package ru.fenix2k.Chatter.server.Exception;
 
-import ru.fenix2k.Chatter.server.EntityView.ValidationErrorView;
+import ru.fenix2k.Chatter.server.View.ValidationErrorView;
 
 import java.util.Set;
 
